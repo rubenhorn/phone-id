@@ -6,13 +6,13 @@ class VerificationCodeSendException(VerificationException):
 class VerificationCodeCheckException(VerificationException):
     pass
 
+class PhoneVerificationService():
+        async def send_verification_code(self, phone_number) -> str:
+            raise NotImplementedError()
+            # TODO implement twilio or other verification api
+            # raise VerificationCodeSendException('Phone number verification failed')
 
-async def send_verification_code(phone_number) -> str:
-    # TODO implement twilio or other verification api
-    # raise VerificationCodeSendException('Phone number verification failed')
-    return 'myVerificationId'
-
-async def verify_phone_number(phone_number, phone_number_verification_id, verification_code):
-    # TODO implement twilio or other verification api
-    # raise VerificationCodeCheckException('Phone number verification failed')
-    pass
+        async def verify_phone_number(self, phone_number, phone_number_verification_id, verification_code):
+            raise NotImplementedError()
+            # TODO implement twilio or other verification api
+            # raise VerificationCodeCheckException('Phone number verification failed')

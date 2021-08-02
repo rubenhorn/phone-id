@@ -13,6 +13,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import validate_and_format_phone_number, validate_verification_code, InputException
 from verification import *
+from verification_mock import MockPhoneVerificationService
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
@@ -23,6 +24,8 @@ class Settings(BaseModel):
 @AuthJWT.load_config
 def get_config():
     return Settings()
+
+verification_service: PhoneVerificationService = MockPhoneVerificationService()
 
 title = 'CollAction_phone-auth'
 if (config.get(KEY_USE_OPENAPI) or '').lower() == 'true':
@@ -61,7 +64,7 @@ async def register(phone_number: str = Form(...), AuthJWT: AuthJWT = Depends()):
     existing_phone_number_user = get_user_by_phone_number(
         formatted_phone_number)
     if current_user_id is None:  # Then register user
-        phone_number_verification_id = await send_verification_code(formatted_phone_number)
+        phone_number_verification_id = await verification_service.send_verification_code(formatted_phone_number)
         # New user registering
         if existing_phone_number_user is None:
             create_user(formatted_phone_number, phone_number_verification_id)
@@ -82,7 +85,7 @@ async def register(phone_number: str = Form(...), AuthJWT: AuthJWT = Depends()):
                                 detail='User not found')
         # Update phone number
         else:
-            phone_number_verification_id = await send_verification_code(formatted_phone_number)
+            phone_number_verification_id = await verification_service.send_verification_code(formatted_phone_number)
             change_user_phone_number(
                 current_user_id, formatted_phone_number, phone_number_verification_id)
             return JSONResponse(status_code=HTTP_OK, content={'detail': 'User phone number changed and verification code sent'})
@@ -103,7 +106,7 @@ async def login(phone_number: str = Form(...), verification_code: str = Form(...
     if current_user.phone_number_verification_id is None:
         raise HTTPException(status_code=HTTP_BAD_REQUEST,
                             detail='User not verified (Please send verification code)')
-    await verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
+    await verification_service.verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
     mark_user_phone_number_as_verified(current_user.id)
     access_token = create_access_token(Authorize, current_user.id)
     refresh_token = Authorize.create_refresh_token(
