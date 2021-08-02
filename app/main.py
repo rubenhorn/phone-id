@@ -1,4 +1,3 @@
-from starlette.responses import JSONResponse
 import config
 from constants import *
 from crud import *
@@ -7,32 +6,30 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Form
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from fastapi.openapi.utils import get_openapi
 from models import User
+from openapi import get_custom_openapi
 from pydantic.main import BaseModel
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 from validation import validate_and_format_phone_number, validate_verification_code, InputException
 from verification import *
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
 
-title = 'CollAction_phone-auth'
-if (config.get(KEY_USE_OPENAPI) or '').lower() == 'true':
-    app = FastAPI(title=title, redoc_url=None)
-else:
-    app = FastAPI(title=title, redoc_url=None, docs_url=None, openapi_url=None)
-create_database()
-
-
 class Settings(BaseModel):
     authjwt_secret_key: str = config.get(KEY_JWT_SECRET)
-
 
 @AuthJWT.load_config
 def get_config():
     return Settings()
 
+title = 'CollAction_phone-auth'
+if (config.get(KEY_USE_OPENAPI) or '').lower() == 'true':
+    app = FastAPI(title=title, redoc_url=None)
+else:
+    app = FastAPI(title=title, redoc_url=None, docs_url=None, openapi_url=None, debug=False)
+create_database()
 
 @app.exception_handler(HTTPException)
 def http_exception_handler(request: Request, exc: HTTPException):
@@ -122,29 +119,4 @@ async def refresh(Authorize: AuthJWT = Depends()):
     return {'access_token': new_token}
 
 
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=app.title, version=app.version, routes=app.routes)
-
-    router_authorize = [route for route in app.routes[3:]
-                        if route.operation_id in [OP_ID_AUTHORIZE, OP_ID_MAY_AUTHORIZE]]
-    for route in router_authorize:
-        print(route.path)
-        method = list(route.methods)[0].lower()
-        additional_header = {'name': 'Authorization', 'in': 'header', 'schema': {
-            'title': 'Authorization', 'type': 'string'}, 'required': route.operation_id == OP_ID_AUTHORIZE}
-        try:
-            openapi_schema['paths'][route.path][method]['parameters'].append(
-                additional_header)
-        except Exception:
-            openapi_schema['paths'][route.path][method].update(
-                {'parameters': [additional_header]})
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi
+app.openapi = get_custom_openapi(app)
