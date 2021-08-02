@@ -9,11 +9,12 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 from models import User
 from openapi import get_custom_openapi
 from pydantic.main import BaseModel
+from routers import register
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import validate_and_format_phone_number, validate_verification_code, InputException
 from verification import *
-from verification_mock import MockPhoneVerificationService
+from verification.mock import MockPhoneVerificationService
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
@@ -56,40 +57,7 @@ async def verification_exception_handler(request: Request, exc: VerificationExce
         status_code = HTTP_UNPROCESSABLE_ENTITY
     return JSONResponse(status_code=status_code, content={'detail': str(exc)})
 
-
-@app.post(ROUTE_REGISTER, operation_id=OP_ID_MAY_AUTHORIZE)
-async def register(phone_number: str = Form(...), AuthJWT: AuthJWT = Depends()):
-    formatted_phone_number = validate_and_format_phone_number(phone_number)
-    current_user_id = AuthJWT.get_jwt_subject()
-    existing_phone_number_user = get_user_by_phone_number(
-        formatted_phone_number)
-    if current_user_id is None:  # Then register user
-        phone_number_verification_id = await verification_service.send_verification_code(formatted_phone_number)
-        # New user registering
-        if existing_phone_number_user is None:
-            create_user(formatted_phone_number, phone_number_verification_id)
-            return JSONResponse(status_code=HTTP_CREATED, content={'detail': 'User created and verification code sent'})
-        # Existing user registering (on other device or after logoout)
-        else:
-            set_phone_number_verification_id(
-                existing_phone_number_user.id, phone_number_verification_id)
-            return JSONResponse(status_code=HTTP_OK, content={'detail': 'Verification code sent'})
-    else:  # Then change phone number
-        # Phone number is already registered to other user
-        if existing_phone_number_user is not None and existing_phone_number_user.phone_number_verified:
-            raise HTTPException(status_code=HTTP_CONFLICT,
-                                detail='Phone number already registered')
-        # User does no longer exist
-        elif get_user_by_id(current_user_id) is None:
-            raise HTTPException(status_code=HTTP_NOT_FOUND,
-                                detail='User not found')
-        # Update phone number
-        else:
-            phone_number_verification_id = await verification_service.send_verification_code(formatted_phone_number)
-            change_user_phone_number(
-                current_user_id, formatted_phone_number, phone_number_verification_id)
-            return JSONResponse(status_code=HTTP_OK, content={'detail': 'User phone number changed and verification code sent'})
-
+app.include_router(register.router)
 
 def create_access_token(Authorize: AuthJWT, current_user: str):
     return Authorize.create_access_token(subject=current_user)
