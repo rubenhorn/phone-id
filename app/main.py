@@ -1,32 +1,30 @@
+from fastapi_jwt_auth.auth_jwt import AuthJWT
+from pydantic.main import BaseModel
 import config
 from constants import *
 from crud import *
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
-from fastapi.param_functions import Form
-from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from models import User
 from openapi import get_custom_openapi
-from pydantic.main import BaseModel
 from routers import register, login, refresh
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from validation import validate_and_format_phone_number, validate_verification_code, InputException
+from validation import InputException
 from verification import *
 from verification.mock import MockPhoneVerificationService
+
+verification_service: PhoneVerificationService = MockPhoneVerificationService()
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
 
-class Settings(BaseModel):
+class __Settings(BaseModel):
     authjwt_secret_key: str = config.get(KEY_JWT_SECRET)
 
 @AuthJWT.load_config
 def get_config():
-    return Settings()
-
-verification_service: PhoneVerificationService = MockPhoneVerificationService()
+    return __Settings()
 
 title = 'CollAction_phone-auth'
 if (config.get(KEY_USE_OPENAPI) or '').lower() == 'true':
