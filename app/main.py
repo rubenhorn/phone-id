@@ -11,10 +11,8 @@ from routers import register, login, refresh
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import InputException
-from verification import *
+from verification._abstract import *
 from verification.mock import MockPhoneVerificationService
-
-verification_service: PhoneVerificationService = MockPhoneVerificationService()
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
@@ -53,7 +51,7 @@ async def verification_exception_handler(request: Request, exc: VerificationExce
     status_code = HTTP_INTERNAL_SERVER_ERROR
     if isinstance(exc, VerificationCodeCheckException):
         status_code = HTTP_UNPROCESSABLE_ENTITY
-    return JSONResponse(status_code=status_code, content={'detail': str(exc)})
+    return JSONResponse(status_code=status_code, content={'detail': 'Phone number verification failed'})
 
 app.include_router(register.router)
 app.include_router(login.router)

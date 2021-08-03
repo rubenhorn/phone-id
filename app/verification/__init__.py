@@ -1,18 +1,12 @@
-class VerificationException(Exception):
-    pass
-class VerificationCodeSendException(VerificationException):
-    pass
+from verification._abstract import PhoneVerificationService
+from verification.mock import MockPhoneVerificationService
 
-class VerificationCodeCheckException(VerificationException):
-    pass
+def __create_phone_verification_service():
+    if True:#TODO use env vars
+        phone_verification_service = MockPhoneVerificationService()
+    return phone_verification_service
 
-class PhoneVerificationService():
-        async def send_verification_code(self, phone_number) -> str:
-            raise NotImplementedError()
-            # TODO implement twilio or other verification api
-            # raise VerificationCodeSendException('Phone number verification failed')
+__phone_verification_service = __create_phone_verification_service()
 
-        async def verify_phone_number(self, phone_number, phone_number_verification_id, verification_code):
-            raise NotImplementedError()
-            # TODO implement twilio or other verification api
-            # raise VerificationCodeCheckException('Phone number verification failed')
+def get_phone_verification_service() -> PhoneVerificationService:
+    return __phone_verification_service

@@ -1,5 +1,5 @@
 import phonenumbers
-from verification import *
+from verification._abstract import PhoneVerificationService, VerificationCodeSendException, VerificationCodeCheckException
 
 class MockPhoneVerificationService(PhoneVerificationService):
 
@@ -11,10 +11,10 @@ class MockPhoneVerificationService(PhoneVerificationService):
 
     async def send_verification_code(self, phone_number) -> str:
             if phonenumbers.parse(phone_number, None) == self.phone_number_cannot_send_verification_code:
-                raise VerificationCodeSendException('Phone number verification failed')
+                raise VerificationCodeSendException()
             else:
                 return self.phone_number_verification_id
 
     async def verify_phone_number(self, phone_number, phone_number_verification_id, verification_code):
         if verification_code != self.verification_code_valid:
-            raise VerificationCodeCheckException('Phone number verification failed')
+            raise VerificationCodeCheckException()
