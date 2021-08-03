@@ -1,8 +1,6 @@
 import os
-from dotenv.main import dotenv_values
 
 __config = {
-    **dotenv_values('../.env'),
     **os.environ
 }
 
