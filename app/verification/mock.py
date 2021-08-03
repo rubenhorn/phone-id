@@ -18,3 +18,6 @@ class MockPhoneVerificationService(PhoneVerificationService):
     async def verify_phone_number(self, phone_number, phone_number_verification_id, verification_code):
         if verification_code != self.verification_code_valid:
             raise VerificationCodeCheckException()
+
+    async def cancel_phone_number_verification(self, phone_number_verification_id):
+        pass        

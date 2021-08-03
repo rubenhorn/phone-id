@@ -17,5 +17,5 @@ def __create_phone_verification_service():
 
 __phone_verification_service = __create_phone_verification_service()
 
-def get_phone_verification_service() -> PhoneVerificationService:
+def get_phone_number_verification_service() -> PhoneVerificationService:
     return __phone_verification_service

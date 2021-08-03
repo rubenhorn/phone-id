@@ -18,8 +18,15 @@ class VonagePhoneVerificationService(PhoneVerificationService):
             raise VerificationCodeSendException('Phone number verification failed')
 
     async def verify_phone_number(self, phone_number, phone_number_verification_id, verification_code):
-        response = self.verify.verify(phone_number_verification_id, code=verification_code)
+        response = self.verify.check(phone_number_verification_id, code=verification_code)
         if response['status'] != '0':
             error_text = response['error_text']
-            print(f'Error starting verification: {error_text}', file=sys.stderr)
+            print(f'Error on verification check: {error_text}', file=sys.stderr)
             raise VerificationCodeCheckException('Phone number verification failed')
+
+    async def cancel_phone_number_verification(self, phone_number_verification_id):
+        response = self.verify.cancel(phone_number_verification_id)
+        if response['status'] != '0':
+            error_text = response['error_text']
+            print(f'Error canceling verification: {error_text}', file=sys.stderr)
+        

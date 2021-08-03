@@ -6,9 +6,10 @@ from fastapi_jwt_auth.auth_jwt import AuthJWT
 from constants import HTTP_NOT_FOUND, ROUTE_LOGIN, HTTP_BAD_REQUEST
 from fastapi import APIRouter
 from fastapi.params import Depends, Form
-from verification import get_phone_verification_service
+from verification import get_phone_number_verification_service
 
 router = APIRouter()
+verification_service = get_phone_number_verification_service()
 
 @router.post(ROUTE_LOGIN)
 async def login(phone_number: str = Form(...), verification_code: str = Form(...), Authorize: AuthJWT = Depends()):
@@ -21,7 +22,7 @@ async def login(phone_number: str = Form(...), verification_code: str = Form(...
     if current_user.phone_number_verification_id is None:
         raise HTTPException(status_code=HTTP_BAD_REQUEST,
                             detail='User not verified (Please send verification code)')
-    await get_phone_verification_service().verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
+    await verification_service.verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
     mark_user_phone_number_as_verified(current_user.id)
     access_token = Authorize.create_access_token(subject=current_user.id)
     refresh_token = Authorize.create_refresh_token(

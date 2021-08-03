@@ -6,9 +6,10 @@ from fastapi.params import Depends, Form
 from fastapi_jwt_auth.auth_jwt import AuthJWT
 from constants import HTTP_CONFLICT, HTTP_CREATED, HTTP_NOT_FOUND, HTTP_OK, OP_ID_MAY_AUTHORIZE, ROUTE_REGISTER
 from fastapi import APIRouter
-from verification import get_phone_verification_service
+from verification import get_phone_number_verification_service
 
 router = APIRouter()
+verification_service = get_phone_number_verification_service()
 
 
 @router.post(ROUTE_REGISTER, operation_id=OP_ID_MAY_AUTHORIZE)
@@ -17,8 +18,11 @@ async def __register(phone_number: str = Form(...), AuthJWT: AuthJWT = Depends()
     current_user_id = AuthJWT.get_jwt_subject()
     existing_phone_number_user = get_user_by_phone_number(
         formatted_phone_number)
+    if existing_phone_number_user is not None and existing_phone_number_user.phone_number_verification_id is not None:
+        # Pending verification for the same phone number must be canceled
+        await verification_service.cancel_phone_number_verification(existing_phone_number_user.phone_number_verification_id)
     if current_user_id is None:  # Then register user
-        phone_number_verification_id = await get_phone_verification_service().send_verification_code(formatted_phone_number)
+        phone_number_verification_id = await verification_service.send_verification_code(formatted_phone_number)
         # New user registering
         if existing_phone_number_user is None:
             create_user(formatted_phone_number, phone_number_verification_id)
