@@ -2,6 +2,7 @@ from constants import OP_ID_AUTHORIZE, OP_ID_MAY_AUTHORIZE
 from fastapi.applications import FastAPI
 from fastapi.openapi.utils import get_openapi
 
+# Add authentication header for jwt to api documentation
 def get_custom_openapi(app: FastAPI):
     def custom_openapi():
         if app.openapi_schema:

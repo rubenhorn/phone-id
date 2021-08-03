@@ -12,7 +12,6 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import InputException
 from verification._abstract import *
-from verification.mock import MockPhoneVerificationService
 
 if config.get(KEY_JWT_SECRET) is None:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')

@@ -17,7 +17,3 @@ class User(Base):
     phone_number = Column(String, nullable=False, unique=True)
     phone_number_verified = Column(Boolean, default=False)
     phone_number_verification_id = Column(String)
-
-#TODO delete this??
-    def __repr__(self) -> str:
-        return f'User(id="{ self.id }", phone_number="{ self.phone_number }", phone_number_verified="{ self.phone_number_verified }", phone_number_verification_id="{ self.phone_number_verification_id }")'
