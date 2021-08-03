@@ -1,3 +1,4 @@
+from constants import SMS_PIN_LENGTH
 import phonenumbers
 
 class InputException(Exception):
@@ -16,5 +17,5 @@ def validate_and_format_phone_number(phone_number_str: str) -> str:
     return phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.E164)
 
 def validate_verification_code(verification_code: str):
-    if not verification_code.isdigit():
+    if not verification_code.isdigit() or len(verification_code) != SMS_PIN_LENGTH:
         raise InputException('Invalid verification code')
