@@ -8,7 +8,7 @@ from verification.vonage import VonagePhoneVerificationService
 def __create_phone_verification_service():
     vonage_api_key = config.get(KEY_VONAGE_API_KEY)
     vonage_api_secret = config.get(KEY_VONAGE_API_SECRET)
-    if vonage_api_key is None or vonage_api_secret is None:
+    if len(vonage_api_key) == 0 or len(vonage_api_secret) == 0:
         print('Incomplete Vonage configuration (Falling back on mock verification service)', file=sys.stderr)
         phone_verification_service = MockPhoneVerificationService()
     else:

@@ -13,7 +13,7 @@ from starlette.responses import JSONResponse
 from validation import InputException
 from verification._abstract import *
 
-if config.get(KEY_JWT_SECRET) is None:
+if len(config.get(KEY_JWT_SECRET)) == 0:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')
 
 class __Settings(BaseModel):
@@ -23,8 +23,8 @@ class __Settings(BaseModel):
 def get_config():
     return __Settings()
 
-title = 'CollAction_phone-auth'
-if (config.get(KEY_USE_OPENAPI) or '').lower() == 'true':
+title = 'CollAction_PhoneID'
+if config.get(KEY_USE_OPENAPI).lower() == 'true':
     app = FastAPI(title=title, redoc_url=None)
 else:
     app = FastAPI(title=title, redoc_url=None, docs_url=None, openapi_url=None, debug=False)

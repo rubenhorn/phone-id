@@ -4,5 +4,5 @@ __config = {
     **os.environ
 }
 
-def get(key):
-    return __config[key] if key in __config else None
+def get(key: str) -> str:
+    return (__config[key] if key in __config else '').strip()

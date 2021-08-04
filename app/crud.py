@@ -11,7 +11,7 @@ def __get_db_url():
     host = config.get(KEY_POSTGRESQL_HOST)
     port = config.get(KEY_POSTGRESQL_PORT)
     db = config.get(KEY_POSTGRESQL_DB)
-    if len([v for v in [user, password, host, port, db] if v is None or v.strip() is '']) != 0:
+    if '' in [user, password, host, port, db]:
         print('Incomplete PostgreSQL configuration (Falling back on ephemeral in-memory sqlite database)', file=sys.stderr)
         db_url = 'sqlite:///'
     else:

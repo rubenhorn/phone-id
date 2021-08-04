@@ -9,7 +9,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'user'
-    if (config.get(KEY_USE_POSTGRESQL_DIALECT) or '').lower() == 'true':
+    if config.get(KEY_USE_POSTGRESQL_DIALECT).lower() == 'true':
         id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     else:
         uuid4_string = lambda: str(uuid.uuid4())
