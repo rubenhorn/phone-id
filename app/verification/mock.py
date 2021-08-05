@@ -1,6 +1,7 @@
 from constants import SMS_PIN_LENGTH
 import phonenumbers
-from verification._abstract import PhoneVerificationService, VerificationCodeSendException, VerificationCodeCheckException
+from verification.abc import PhoneVerificationService
+from verification.exceptions import VerificationCodeSendException, VerificationCodeCheckException
 
 class MockPhoneVerificationService(PhoneVerificationService):
 

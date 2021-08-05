@@ -1,6 +1,7 @@
 from constants import SMS_PIN_LENGTH
 import sys
-from verification._abstract import PhoneVerificationService, VerificationCodeSendException, VerificationCodeCheckException
+from verification.abc import PhoneVerificationService
+from verification.exceptions import VerificationCodeSendException, VerificationCodeCheckException
 import vonage
 
 class VonagePhoneVerificationService(PhoneVerificationService):

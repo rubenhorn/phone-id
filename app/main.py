@@ -11,7 +11,7 @@ from routers import register, login, refresh
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import InputException
-from verification._abstract import *
+from verification.exceptions import *
 
 if len(config.get(KEY_JWT_SECRET)) == 0:
     raise LookupError(f'Environmet variable { KEY_JWT_SECRET } not set')

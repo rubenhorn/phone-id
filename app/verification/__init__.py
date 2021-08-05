@@ -1,7 +1,7 @@
 import config
 from constants import KEY_VONAGE_API_KEY, KEY_VONAGE_API_SECRET
 import sys
-from verification._abstract import PhoneVerificationService
+from verification.abc import PhoneVerificationService
 from verification.mock import MockPhoneVerificationService
 from verification.vonage import VonagePhoneVerificationService
 
