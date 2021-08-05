@@ -9,7 +9,7 @@ class VonagePhoneVerificationService(PhoneVerificationService):
         self.verify = vonage.Verify(client)
 
     async def send_verification_code(self, phone_number) -> str:
-        response = self.verify.start_verification(number=phone_number, code_length=SMS_PIN_LENGTH, brand='CollAction app', sender_id='CollAction')
+        response = self.verify.start_verification(number=phone_number, code_length=SMS_PIN_LENGTH, brand='CollAction App', sender_id='CollAction')
         if response['status'] == '0':
             return response['request_id']
         else:

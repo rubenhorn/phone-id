@@ -21,10 +21,11 @@ async def login(phone_number: str = Form(...), verification_code: str = Form(...
                             detail='User not found (Please register!)')
     if current_user.phone_number_verification_id is None:
         raise HTTPException(status_code=HTTP_BAD_REQUEST,
-                            detail='User not verified (Please send verification code)')
+                            detail='No pending registration found (Please register!)')
     await verification_service.verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
     mark_user_phone_number_as_verified(current_user.id)
-    access_token = Authorize.create_access_token(subject=current_user.id)
+    subject = str(current_user.id)
+    access_token = Authorize.create_access_token(subject=subject)
     refresh_token = Authorize.create_refresh_token(
-        subject=current_user.id, expires_time=False)  # TODO add token invalidation later?
+        subject=subject, expires_time=False)  # TODO add token invalidation later?
     return {'access_token': access_token, 'refresh_token': refresh_token}

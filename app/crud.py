@@ -15,7 +15,7 @@ def __get_db_url():
         print('Incomplete PostgreSQL configuration (Falling back on ephemeral in-memory sqlite database)', file=sys.stderr)
         db_url = 'sqlite:///'
     else:
-        db_url = f'postgres+psycopg2://{user}:{password}@{host}:{port}/{db}'
+        db_url = f'postgresql://{user}:{password}@{host}:{port}/{db}'
     return db_url
 
 __engine = create_engine(__get_db_url(), echo=False)
