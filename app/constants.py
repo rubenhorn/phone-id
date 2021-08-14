@@ -1,6 +1,6 @@
 # HTTP routes
-ROUTE_REGISTER = '/register'
-ROUTE_LOGIN = '/token'
+ROUTE_REGISTER = '/register_number'
+ROUTE_LOGIN = '/verify_number'
 ROUTE_REFRESH = '/refresh'
 
 # FastAPI operation ids

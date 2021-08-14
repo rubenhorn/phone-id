@@ -1,7 +1,7 @@
 import config
 from constants import KEY_USE_POSTGRESQL_DIALECT
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Column, String, Boolean, Integer
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 

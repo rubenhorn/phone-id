@@ -6,15 +6,18 @@ from fastapi.params import Depends, Form
 from fastapi_jwt_auth.auth_jwt import AuthJWT
 from constants import HTTP_CONFLICT, HTTP_CREATED, HTTP_NOT_FOUND, HTTP_OK, OP_ID_MAY_AUTHORIZE, ROUTE_REGISTER
 from fastapi import APIRouter
+from pydantic import BaseModel
 from verification import get_phone_number_verification_service
 
 router = APIRouter()
 verification_service = get_phone_number_verification_service()
 
+class __Registration(BaseModel):
+    phone_number: str
 
 @router.post(ROUTE_REGISTER, operation_id=OP_ID_MAY_AUTHORIZE)
-async def __register(phone_number: str = Form(...), AuthJWT: AuthJWT = Depends()):
-    formatted_phone_number = validate_and_format_phone_number(phone_number)
+async def __register(registration: __Registration, AuthJWT: AuthJWT = Depends()):
+    formatted_phone_number = validate_and_format_phone_number(registration.phone_number)
     current_user_id = AuthJWT.get_jwt_subject()
     existing_phone_number_user = get_user_by_phone_number(
         formatted_phone_number)

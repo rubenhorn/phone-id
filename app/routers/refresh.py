@@ -1,3 +1,4 @@
+from auth import get_user_claims
 from constants import HTTP_NOT_FOUND
 from crud import get_user_by_id
 from fastapi import APIRouter
@@ -12,8 +13,9 @@ router = APIRouter()
 async def __refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
     subject: str = Authorize.get_jwt_subject()
-    if get_user_by_id(subject) is None:
+    current_user = get_user_by_id(subject)
+    if current_user is None:
         raise HTTPException(status_code=HTTP_NOT_FOUND,
                             detail='User does not exist (Deleted)')
-    new_token = Authorize.create_access_token(subject=subject)
+    new_token = Authorize.create_access_token(subject=subject, user_claims=get_user_claims())
     return {'access_token': new_token}
