@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from openapi import get_custom_openapi
-from routers import register, login, refresh
+from routers import register, verify, refresh
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from validation import InputException
@@ -53,7 +53,7 @@ async def verification_exception_handler(request: Request, exc: VerificationExce
     return JSONResponse(status_code=status_code, content={'detail': 'Phone number verification failed'})
 
 app.include_router(register.router)
-app.include_router(login.router)
+app.include_router(verify.router)
 app.include_router(refresh.router)
 
 app.openapi = get_custom_openapi(app)

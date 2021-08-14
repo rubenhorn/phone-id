@@ -18,7 +18,7 @@ class __Verification(BaseModel):
     verification_code: str
 
 @router.post(ROUTE_LOGIN)
-async def login(verification: __Verification, Authorize: AuthJWT = Depends()):
+async def verify(verification: __Verification, Authorize: AuthJWT = Depends()):
     phone_number = verification.phone_number
     verification_code = verification.verification_code
     formatted_phone_number = validate_and_format_phone_number(phone_number)
