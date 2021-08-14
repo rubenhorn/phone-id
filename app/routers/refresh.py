@@ -17,5 +17,5 @@ async def __refresh(Authorize: AuthJWT = Depends()):
     if current_user is None:
         raise HTTPException(status_code=HTTP_NOT_FOUND,
                             detail='User does not exist (Deleted)')
-    new_token = Authorize.create_access_token(subject=subject, user_claims=get_user_claims())
+    new_token = Authorize.create_access_token(subject=subject, user_claims=get_user_claims(current_user))
     return {'access_token': new_token}
