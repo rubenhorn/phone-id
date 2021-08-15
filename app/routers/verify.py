@@ -1,4 +1,3 @@
-from auth import get_user_claims
 from fastapi.exceptions import HTTPException
 from models import User
 from crud import get_user_by_phone_number, mark_user_phone_number_as_verified
@@ -33,9 +32,7 @@ async def verify(verification: __Verification, Authorize: AuthJWT = Depends()):
     await verification_service.verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
     mark_user_phone_number_as_verified(current_user.id)
     subject = str(current_user.id)
-    current_user.phone_number_verified = True
-    user_claims = get_user_claims(current_user)
-    access_token = Authorize.create_access_token(subject=subject, user_claims=user_claims)
+    access_token = Authorize.create_access_token(subject=subject)
     refresh_token = Authorize.create_refresh_token(
-        subject=subject, expires_time=False, user_claims=user_claims)  # TODO add token invalidation (use jti claim with blacklist)
+        subject=subject, expires_time=False)  # TODO add token invalidation (use jti claim with blacklist)
     return {'access_token': access_token, 'refresh_token': refresh_token}

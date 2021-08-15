@@ -12,6 +12,8 @@ client = TestClient(app)
 
 phone_number_valid = '+31655551111'
 
+jwt_to_payload_json = lambda jwt: json.loads(b64decode(jwt.split('.')[1] + '=='))
+
 @pytest.fixture(scope='function')
 def setup_run_teardown():
     assert phone_number_valid != MockPhoneVerificationService.phone_number_cannot_send_verification_code
@@ -73,20 +75,16 @@ class TestVerify:
         assert response.status_code == 200
         # Check accsess token
         access_token = response.json()['access_token']
-        access_token_claims = json.loads(b64decode(access_token.split('.')[1]))
+        access_token_claims = jwt_to_payload_json(access_token)
         assert access_token_claims['type'] == 'access'
         assert 'sub' in access_token_claims
         assert 'jti' in access_token_claims
-        assert access_token_claims['phone_number'] == phone_number_valid
-        assert access_token_claims['phone_number_verified'] == True
         # Check refresh token
         refresh_token = response.json()['refresh_token']
-        refresh_token_claims = json.loads(b64decode(refresh_token.split('.')[1]))
+        refresh_token_claims = jwt_to_payload_json(refresh_token)
         assert refresh_token_claims['type'] == 'refresh'
         assert 'sub' in refresh_token_claims
         assert 'jti' in refresh_token_claims
-        assert refresh_token_claims['phone_number'] == phone_number_valid
-        assert refresh_token_claims['phone_number_verified'] == True
 
     def test_change_number(self, setup_run_teardown):
         initial_phone_number = phone_number_valid
@@ -94,8 +92,7 @@ class TestVerify:
         code = MockPhoneVerificationService.verification_code_valid
         response = client.post('/verify_number', json={ 'phone_number' : initial_phone_number, 'verification_code' : code })
         access_token = response.json()['access_token']
-        access_token_claims = json.loads(b64decode(access_token.split('.')[1]))
-        assert access_token_claims['phone_number'] == initial_phone_number
+        access_token_claims = jwt_to_payload_json(access_token)
         subject = access_token_claims['sub']
         # Change phone number
         new_phone_number = '+31655552222'
@@ -104,8 +101,7 @@ class TestVerify:
         code = MockPhoneVerificationService.verification_code_valid
         response = client.post('/verify_number', json={ 'phone_number' : new_phone_number, 'verification_code' : code })
         access_token = response.json()['access_token']
-        access_token_claims = json.loads(b64decode(access_token.split('.')[1]))
-        assert access_token_claims['phone_number'] == new_phone_number
+        access_token_claims = jwt_to_payload_json(access_token)
         assert subject == access_token_claims['sub'] # Did NOT create a new account
 
 class TestRefresh:
@@ -130,7 +126,7 @@ class TestRefresh:
         code = MockPhoneVerificationService.verification_code_valid
         response = client.post('/verify_number', json={ 'phone_number' : phone_number_valid, 'verification_code' : code })
         access_token = response.json()['access_token']
-        initial_claims = json.loads(b64decode(access_token.split('.')[1]))
+        initial_claims = jwt_to_payload_json(access_token)
         refresh_token = response.json()['refresh_token']
         time.sleep(1) # Make sure that a different token will be generated
         response = client.post('/refresh', headers={ 'Authorization' : 'Bearer ' + refresh_token })
@@ -138,12 +134,10 @@ class TestRefresh:
         assert access_token != response.json()['access_token']
         # Check if the token has the same claims
         access_token = response.json()['access_token']
-        new_claims = json.loads(b64decode(access_token.split('.')[1]))
+        new_claims = jwt_to_payload_json(access_token)
         assert new_claims['type'] == 'access'
         assert new_claims['sub'] == initial_claims['sub']
         assert new_claims['jti'] != initial_claims['jti'] # JTI is unique
-        assert new_claims['phone_number'] == initial_claims['phone_number']
-        assert new_claims['phone_number_verified'] == initial_claims['phone_number_verified']
 
 class TestSearch:
     def test_search_no_token(self, setup_run_teardown):
