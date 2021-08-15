@@ -18,6 +18,7 @@ if len(config.get(KEY_JWT_SECRET)) == 0:
 
 class __Settings(BaseModel):
     authjwt_secret_key: str = config.get(KEY_JWT_SECRET)
+    authjwt_algorithm: str = JWT_ALGORITHM
 
 @AuthJWT.load_config
 def get_config():

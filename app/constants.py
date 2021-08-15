@@ -30,3 +30,7 @@ KEY_VONAGE_API_SECRET = 'VONAGE_API_SECRET'
 
 # Misc
 SMS_PIN_LENGTH = 6
+JWT_ALGORITHM = 'HS256'
+
+# Database table names
+DB_TABLE_NAME_USER = 'user'

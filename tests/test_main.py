@@ -88,6 +88,26 @@ class TestVerify:
         assert refresh_token_claims['phone_number'] == phone_number_valid
         assert refresh_token_claims['phone_number_verified'] == True
 
+    def test_change_number(self, setup_run_teardown):
+        initial_phone_number = phone_number_valid
+        client.post('/register_number', json={ 'phone_number' : initial_phone_number })
+        code = MockPhoneVerificationService.verification_code_valid
+        response = client.post('/verify_number', json={ 'phone_number' : initial_phone_number, 'verification_code' : code })
+        access_token = response.json()['access_token']
+        access_token_claims = json.loads(b64decode(access_token.split('.')[1]))
+        assert access_token_claims['phone_number'] == initial_phone_number
+        subject = access_token_claims['sub']
+        # Change phone number
+        new_phone_number = '+31655552222'
+        assert initial_phone_number != new_phone_number
+        client.post('/register_number', json={ 'phone_number' : new_phone_number },  headers={ 'Authorization' : 'Bearer ' + access_token })
+        code = MockPhoneVerificationService.verification_code_valid
+        response = client.post('/verify_number', json={ 'phone_number' : new_phone_number, 'verification_code' : code })
+        access_token = response.json()['access_token']
+        access_token_claims = json.loads(b64decode(access_token.split('.')[1]))
+        assert access_token_claims['phone_number'] == new_phone_number
+        assert subject == access_token_claims['sub'] # Did NOT create a new account
+
 class TestRefresh:
     def test_refresh_no_token(self, setup_run_teardown):
         response = client.post('/refresh')
@@ -95,7 +115,14 @@ class TestRefresh:
         assert response.status_code == 400
 
     def test_refresh_invalid_token(self, setup_run_teardown):
-        response = client.post('/refresh', headers={ 'Authorization' : 'Bearer not a token' })
+        header = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9'
+        payload = 'eyJzdWIiOiIzZjVhYmUyZS01MmI5LTRlODItYjcxZi02ZmJjYzI1ZWRhMWIiLCJpYXQiOjE2Mjk' + \
+            'wMjAyOTAsIm5iZiI6MTYyOTAyMDI5MCwianRpIjoiMjBkZDJmNzktOTZkNy00OTdhLWFmZDgtOW' + \
+            'MxYWFjMjFhZGQ4IiwidHlwZSI6InJlZnJlc2giLCJwaG9uZV9udW1iZXIiOiIrMzE2NTU1NTExM' + \
+            'TEiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOnRydWV9'
+        invalid_signature = 'trPGSOX6syEjofR2j7WF4SAx7VSqGBXxmTtDP6bmyhk' # HS256 with empty secret
+        invalid_refresh_token = '.'.join([header, payload, invalid_signature])
+        response = client.post('/refresh', headers={ 'Authorization' : 'Bearer ' + invalid_refresh_token })
         assert response.status_code == 400
 
     def test_refresh_token_is_valid(self, setup_run_teardown):

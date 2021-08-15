@@ -33,6 +33,7 @@ async def verify(verification: __Verification, Authorize: AuthJWT = Depends()):
     await verification_service.verify_phone_number(phone_number, current_user.phone_number_verification_id, verification_code)
     mark_user_phone_number_as_verified(current_user.id)
     subject = str(current_user.id)
+    current_user.phone_number_verified = True
     user_claims = get_user_claims(current_user)
     access_token = Authorize.create_access_token(subject=subject, user_claims=user_claims)
     refresh_token = Authorize.create_refresh_token(

@@ -1,5 +1,5 @@
 import config
-from constants import KEY_USE_POSTGRESQL_DIALECT
+from constants import KEY_USE_POSTGRESQL_DIALECT, DB_TABLE_NAME_USER
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Boolean, Integer
 from sqlalchemy.dialects.postgresql import UUID
@@ -8,7 +8,7 @@ import uuid
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = DB_TABLE_NAME_USER
     if config.get(KEY_USE_POSTGRESQL_DIALECT).lower() == 'true':
         id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     else:

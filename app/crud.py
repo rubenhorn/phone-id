@@ -63,5 +63,5 @@ def change_user_phone_number(id, new_phone_number, phone_number_verification_id)
         user = Session.query(User).filter_by(id=id).first()
         user.phone_number = new_phone_number
         user.phone_number_verified = False
-        phone_number_verification_id = phone_number_verification_id
+        user.phone_number_verification_id = phone_number_verification_id
         Session.commit()
