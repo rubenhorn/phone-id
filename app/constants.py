@@ -2,6 +2,7 @@
 ROUTE_REGISTER = '/register_number'
 ROUTE_LOGIN = '/verify_number'
 ROUTE_REFRESH = '/refresh'
+ROUTE_SEARCH = '/search_numbers'
 
 # FastAPI operation ids
 OP_ID_AUTHORIZE = 'authorize'

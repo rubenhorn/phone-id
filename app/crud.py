@@ -51,6 +51,14 @@ def get_user_by_phone_number(phone_number):
     with __create_session() as Session:
         return Session.query(User).filter_by(phone_number=phone_number).first()
 
+def get_user_ids_for_verified_phone_numbers(phone_numbers):
+    with __create_session() as Session:
+        users = Session.query(User) \
+            .filter(User.phone_number.in_(phone_numbers)) \
+            .filter(User.phone_number_verified.is_(True)) \
+            .all()
+        return [{ 'id': user.id, 'phone_number': user.phone_number } for user in users]
+
 def mark_user_phone_number_as_verified(id):
     with __create_session() as Session:
         user = Session.query(User).filter_by(id=id).first()

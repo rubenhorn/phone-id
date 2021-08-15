@@ -144,4 +144,26 @@ class TestRefresh:
         assert new_claims['jti'] != initial_claims['jti'] # JTI is unique
         assert new_claims['phone_number'] == initial_claims['phone_number']
         assert new_claims['phone_number_verified'] == initial_claims['phone_number_verified']
-        
+
+class TestSearch:
+    def test_search_no_token(self, setup_run_teardown):
+        response = client.post('/search_numbers', json=[ phone_number_valid ])
+        assert response.status_code == 400    
+
+    def test_search(self, setup_run_teardown):
+        phone_numbers = [ f'+3165555000{ i }' for i in range(10) ]
+        client.post('/register_number', json={ 'phone_number' : phone_number_valid })
+        code = MockPhoneVerificationService.verification_code_valid
+        response = client.post('/verify_number', json={ 'phone_number' : phone_number_valid, 'verification_code' : code })
+        access_token = response.json()['access_token']
+        response = client.post('/search_numbers', json=phone_numbers, headers={ 'Authorization' : 'Bearer ' + access_token })
+        assert response.json() == [] # Does not list non existing numbers
+        for number in phone_numbers:
+            client.post('/register_number', json={ 'phone_number' : number })
+        response = client.post('/search_numbers', json=phone_numbers, headers={ 'Authorization' : 'Bearer ' + access_token })
+        assert response.json() == [] # Does not list unverified numbers
+        for number in phone_numbers:
+            code = MockPhoneVerificationService.verification_code_valid
+            r = client.post('/verify_number', json={ 'phone_number' : number, 'verification_code' : code })
+        response = client.post('/search_numbers', json=phone_numbers[:5], headers={ 'Authorization' : 'Bearer ' + access_token })
+        assert len(response.json()) == 5

@@ -6,7 +6,7 @@ from validation import validate_and_format_phone_number, validate_verification_c
 from fastapi_jwt_auth.auth_jwt import AuthJWT
 from constants import HTTP_NOT_FOUND, ROUTE_LOGIN, HTTP_BAD_REQUEST
 from fastapi import APIRouter
-from fastapi.params import Depends, Form
+from fastapi.params import Depends
 from pydantic import BaseModel
 from verification import get_phone_number_verification_service
 
